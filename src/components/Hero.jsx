@@ -1,8 +1,20 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+
 const Hero = () => {
   const heroRef = useRef(null)
   const revealRef = useRef(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   useEffect(() => {
     const hero = heroRef.current
     const reveal = revealRef.current
@@ -40,6 +52,42 @@ const Hero = () => {
       hero.removeEventListener('mouseleave', leave)
     }
   }, [])
+
+  const getMaskImage = () => {
+    if (isMobile) {
+      // Smaller cursor/reveal circles for mobile (scaled down ~50%)
+      return `
+        radial-gradient(circle 100px at var(--x) var(--y),
+        rgba(255,255,255,1) 0%,
+        rgba(255,255,255,0.6) 40%,
+        transparent 70%),
+        radial-gradient(circle 125px at calc(var(--x) + 25px) calc(var(--y) - 20px),
+        rgba(255,255,255,0.8) 0%,
+        rgba(255,255,255,0.4) 40%,
+        transparent 70%),
+        radial-gradient(circle 50px at calc(var(--x) - 25px) calc(var(--y) + 15px),
+        rgba(255,255,255,0.6) 0%,
+        rgba(255,255,255,0.3) 40%,
+        transparent 70%)
+      `
+    }
+    // Original sizes for desktop
+    return `
+      radial-gradient(circle 200px at var(--x) var(--y),
+      rgba(255,255,255,1) 0%,
+      rgba(255,255,255,0.6) 40%,
+      transparent 70%),
+      radial-gradient(circle 250px at calc(var(--x) + 50px) calc(var(--y) - 40px),
+      rgba(255,255,255,0.8) 0%,
+      rgba(255,255,255,0.4) 40%,
+      transparent 70%),
+      radial-gradient(circle 100px at calc(var(--x) - 50px) calc(var(--y) + 30px),
+      rgba(255,255,255,0.6) 0%,
+      rgba(255,255,255,0.3) 40%,
+      transparent 70%)
+    `
+  }
+
   const revealStyle = {
     position: 'absolute',
     top: 0,
@@ -52,47 +100,24 @@ const Hero = () => {
     pointerEvents: 'none',
     opacity: 0,
     transition: 'opacity 0.55s ease',
-    maskImage: `
-      radial-gradient(circle 200px at var(--x) var(--y),
-      rgba(255,255,255,1) 0%,
-      rgba(255,255,255,0.6) 40%,
-      transparent 70%),
-      radial-gradient(circle 250px at calc(var(--x) + 50px) calc(var(--y) - 40px),
-      rgba(255,255,255,0.8) 0%,
-      rgba(255,255,255,0.4) 40%,
-      transparent 70%),
-      radial-gradient(circle 100px at calc(var(--x) - 50px) calc(var(--y) + 30px),
-      rgba(255,255,255,0.6) 0%,
-      rgba(255,255,255,0.3) 40%,
-      transparent 70%)
-    `,
-    WebkitMaskImage: `
-      radial-gradient(circle 200px at var(--x) var(--y),
-      rgba(255,255,255,1) 0%,
-      rgba(255,255,255,0.6) 40%,
-      transparent 70%),
-      radial-gradient(circle 250px at calc(var(--x) + 50px) calc(var(--y) - 40px),
-      rgba(255,255,255,0.8) 0%,
-      rgba(255,255,255,0.4) 40%,
-      transparent 70%),
-      radial-gradient(circle 100px at calc(var(--x) - 50px) calc(var(--y) + 30px),
-      rgba(255,255,255,0.6) 0%,
-      rgba(255,255,255,0.3) 40%,
-      transparent 70%)
-    `,
+    maskImage: getMaskImage(),
+    WebkitMaskImage: getMaskImage(),
   }
+
   const scrollToWatch = () => {
     const watchSection = document.getElementById('watch-section')
     if (watchSection) {
       watchSection.scrollIntoView({ behavior: 'smooth' })
     }
   }
+
   const scrollToEpisodes = () => {
     const episodesSection = document.querySelector('.episodes-header') // Target the header in EpisodesList
     if (episodesSection) {
       episodesSection.scrollIntoView({ behavior: 'smooth' })
     }
   }
+
   const container = {
     hidden: { opacity: 0 },
     visible: {
@@ -100,10 +125,12 @@ const Hero = () => {
       transition: { staggerChildren: 0.2, delayChildren: 0.5 },
     },
   }
+
   const item = {
     hidden: { y: 50, opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { duration: 0.8 } },
   }
+
   return (
     <div className="h-screen bg-cover bg-center bg-[url('/images/will1.png')] relative overflow-hidden" ref={heroRef}>
       <div ref={revealRef} style={revealStyle} />
@@ -118,22 +145,22 @@ const Hero = () => {
       {/* Netflix-style Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/80 z-5" />
       <motion.div
-        className="absolute left-10 bottom-30 flex flex-col gap-1 text-left z-10 max-w-lg" // Reduced gap to gap-1, moved to bottom-10, removed pt-5 and translate
+        className="absolute left-4 sm:left-6 md:left-8 lg:left-10 bottom-8 sm:bottom-10 md:bottom-16 lg:bottom-30 flex flex-col gap-1 text-left z-10 max-w-[90vw] sm:max-w-md md:max-w-lg" // Responsive positioning and max-width; reduced bottom for mobile
         variants={container}
         initial="hidden"
         animate="visible"
       >
-        {/* Logo */}
-        <motion.div variants={item} className="mb-0"> {/* Reduced gap between logo and texts to mb-0 */}
+        {/* Logo - smaller on mobile */}
+        <motion.div variants={item} className="mb-0">
           <img
             src="/images/stranger-things-logo.png"
             alt="Stranger Things"
-            className="h-30 lg:h-40 w-auto drop-shadow-2xl [filter:drop-shadow(0_0_20px_rgba(255,0,0,0.5))]"
+            className="h-16 sm:h-20 md:h-24 lg:h-30 xl:h-40 w-auto drop-shadow-2xl [filter:drop-shadow(0_0_20px_rgba(255,0,0,0.5))]" // Responsive heights
           />
         </motion.div>
-        {/* Genres */}
-        <motion.div variants={item} className="mb-1"> {/* Reduced mb-3 to mb-1 */}
-          <div className="flex flex-wrap gap-2 text-xs lg:text-sm text-gray-300">
+        {/* Genres - already responsive, but ensure smaller base */}
+        <motion.div variants={item} className="mb-1">
+          <div className="flex flex-wrap gap-1 sm:gap-2 text-xs sm:text-sm text-gray-300"> {/* Smaller gap on mobile */}
             <span>2016</span>
             <span>•</span>
             <span>★ 8.7</span>
@@ -145,10 +172,10 @@ const Hero = () => {
             <span>Action & Adventure</span>
           </div>
         </motion.div>
-        {/* Description */}
+        {/* Description - smaller text on mobile */}
         <motion.p
           variants={item}
-          className="text-sm lg:text-base text-gray-200 leading-relaxed [text-shadow:0_0_10px_rgba(255,255,255,0.3)]"
+          className="text-xs sm:text-sm lg:text-base text-gray-200 leading-relaxed [text-shadow:0_0_10px_rgba(255,255,255,0.3)] max-w-[85vw] sm:max-w-none" // Responsive text size and wrap control
         >
           When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.
         </motion.p>
@@ -156,4 +183,5 @@ const Hero = () => {
     </div>
   )
 }
+
 export default Hero
