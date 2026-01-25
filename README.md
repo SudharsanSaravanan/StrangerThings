@@ -23,4 +23,7 @@ All content rights belong to their respective owners.
 This website supports movie and episode viewing only on laptops and desktops.
 Mobile viewing is not supported. Please use a laptop to watch online.
 
+<img width="1897" height="1017" alt="image" src="https://github.com/user-attachments/assets/344bcc86-3483-4d1c-8e79-17caed0e3970" />
 <img width="1897" height="900" alt="Screenshot 2026-01-26 005406" src="https://github.com/user-attachments/assets/1ba61117-c205-44d7-b1c5-ebb17c6f9006" />
+
+
